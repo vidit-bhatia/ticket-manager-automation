@@ -1,0 +1,41 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+*.js.map
+*.css.map
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Session/cache
+.session
+.cache
+
+# Copilot
+.copilot-automation/
+copilot-config.json

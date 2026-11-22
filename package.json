@@ -1,0 +1,41 @@
+{
+  "name": "ticket-manager-automation",
+  "version": "1.0.0",
+  "description": "Automates GitHub ticket management through 3 stages: planning, PR creation, and deployment with E2E testing. Available as Claude skill and GitHub Copilot automation.",
+  "main": ".github/extensions/ticket-manager-automation/extension.mjs",
+  "scripts": {
+    "setup": "bash scripts/setup-automation.sh",
+    "test": "bash scripts/test-automation.sh",
+    "stage1": "bash scripts/stage1-daily-planning.sh",
+    "stage2": "bash scripts/stage2-pr-creation.sh",
+    "stage3": "bash scripts/stage3-deploy.sh"
+  },
+  "keywords": [
+    "github",
+    "automation",
+    "copilot",
+    "claude",
+    "ticket-management",
+    "workflow",
+    "ci-cd",
+    "testing"
+  ],
+  "author": "Vidit Bhatia",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vidit-bhatia/ticket-manager-automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vidit-bhatia/ticket-manager-automation/issues"
+  },
+  "homepage": "https://github.com/vidit-bhatia/ticket-manager-automation#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {
+    "gstack": "*"
+  }
+}

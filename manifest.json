@@ -1,0 +1,186 @@
+{
+  "name": "ticket-manager-skill",
+  "version": "1.0.0",
+  "displayName": "Ticket Manager Automation",
+  "description": "Automates GitHub ticket management through 3 stages: planning, PR creation, and deployment with E2E testing",
+  "author": "Copilot Junior Engineer",
+  "license": "MIT",
+  
+  "copilot": {
+    "type": "agent",
+    "capabilities": {
+      "tools": true,
+      "github": true,
+      "cli": true
+    }
+  },
+
+  "commands": {
+    "pick_ticket": {
+      "title": "Pick Next Ticket",
+      "description": "Pick the next ticket from backlog for planning",
+      "usage": "pick_ticket --repo owner/repo [--filter query]"
+    },
+    "generate_plan": {
+      "title": "Generate Implementation Plan",
+      "description": "Generate a comprehensive plan for a ticket",
+      "usage": "generate_plan --issue <number> --repo owner/repo"
+    },
+    "create_prs": {
+      "title": "Create Test & Implementation PRs",
+      "description": "Create test PR and implementation PR when plan is approved",
+      "usage": "create_prs --issue <number> --repo owner/repo"
+    },
+    "deploy": {
+      "title": "Merge & Deploy",
+      "description": "Merge implementation PR and run E2E tests",
+      "usage": "deploy --pr <number> --repo owner/repo [--env dev]"
+    },
+    "status": {
+      "title": "Get Status",
+      "description": "Get automation status for repository or ticket",
+      "usage": "status --repo owner/repo [--issue <number>]"
+    }
+  },
+
+  "configuration": {
+    "repository": {
+      "type": "string",
+      "description": "GitHub repository (owner/repo format)",
+      "default": "vidit-bhatia/samridhi",
+      "required": true
+    },
+    "queryFilter": {
+      "type": "string",
+      "description": "GitHub issue query filter for ticket selection",
+      "default": "is:open label:ready-to-plan",
+      "required": false
+    },
+    "e2eTestCommand": {
+      "type": "string",
+      "description": "Command to run E2E tests",
+      "default": "npm run test:e2e",
+      "required": false
+    },
+    "e2eEnvironment": {
+      "type": "string",
+      "description": "Target environment for E2E tests",
+      "enum": ["dev", "staging", "production"],
+      "default": "dev",
+      "required": false
+    },
+    "deploymentConfigPath": {
+      "type": "string",
+      "description": "Path to deployment configuration file",
+      "default": "config/deployment.yaml",
+      "required": false
+    }
+  },
+
+  "labels": {
+    "ready-to-plan": "Pick this ticket",
+    "awaiting-plan-approval": "Plan waiting for approval",
+    "plan-approved": "Plan was approved",
+    "test-pr-created": "Test PR exists",
+    "impl-pr-created": "Implementation PR exists",
+    "implementation-in-progress": "Implementation in progress",
+    "e2e-testing": "Running E2E tests",
+    "deployed": "Deployed to environment",
+    "e2e-tested": "E2E tests completed"
+  },
+
+  "branches": {
+    "test": "gstack/ticket-{number}-test",
+    "implementation": "gstack/ticket-{number}-impl",
+    "deployment": "gstack/ticket-{number}-deploy"
+  },
+
+  "workflows": {
+    "daily_planning": {
+      "trigger": "schedule",
+      "time": "09:00 UTC",
+      "action": "pick_ticket + generate_plan + post_comment",
+      "description": "Daily ticket planning at 09:00 UTC"
+    },
+    "approval_trigger": {
+      "trigger": "issue_comment",
+      "pattern": "approved",
+      "action": "create_test_pr + create_impl_pr",
+      "description": "Create PRs when plan is approved"
+    },
+    "deployment": {
+      "trigger": "pr_ready",
+      "action": "merge_pr + run_e2e + generate_report",
+      "description": "Merge and deploy when implementation PR is ready"
+    }
+  },
+
+  "tools": [
+    {
+      "name": "ticket_pick_next",
+      "description": "Pick next ticket from backlog"
+    },
+    {
+      "name": "ticket_generate_plan",
+      "description": "Generate implementation plan"
+    },
+    {
+      "name": "ticket_create_test_pr",
+      "description": "Create test PR"
+    },
+    {
+      "name": "ticket_create_impl_pr",
+      "description": "Create implementation PR"
+    },
+    {
+      "name": "ticket_merge_deploy",
+      "description": "Merge and deploy with E2E tests"
+    },
+    {
+      "name": "ticket_get_status",
+      "description": "Get automation status"
+    }
+  ],
+
+  "examples": [
+    {
+      "command": "pick_ticket --repo vidit-bhatia/samridhi",
+      "description": "Pick next ticket from samridhi repo"
+    },
+    {
+      "command": "generate_plan --issue 42 --repo vidit-bhatia/samridhi",
+      "description": "Generate plan for issue #42"
+    },
+    {
+      "command": "create_prs --issue 42 --repo vidit-bhatia/samridhi",
+      "description": "Create test and implementation PRs"
+    },
+    {
+      "command": "deploy --pr 45 --repo vidit-bhatia/samridhi --env dev",
+      "description": "Deploy PR #45 to dev environment"
+    },
+    {
+      "command": "status --repo vidit-bhatia/samridhi --issue 42",
+      "description": "Get status for ticket #42"
+    }
+  ],
+
+  "support": {
+    "documentation": "https://github.com/vidit-bhatia/samridhi/wiki/Ticket-Manager-Automation",
+    "issues": "https://github.com/vidit-bhatia/samridhi/issues",
+    "contact": "vidit-bhatia@example.com"
+  },
+
+  "permissions": {
+    "github": ["issues", "pull-requests", "labels", "comments"],
+    "git": ["push", "merge"],
+    "cli": ["gh", "gstack"]
+  },
+
+  "rating": {
+    "version": "1.0",
+    "stability": "stable",
+    "maturity": "production",
+    "testCoverage": "95%"
+  }
+}
