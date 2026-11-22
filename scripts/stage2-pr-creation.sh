@@ -3,7 +3,7 @@
 ##############################################################################
 # STAGE 2: Approval & Test PR Creation Automation
 # Trigger: When issue receives comment with "approved"
-# Purpose: Create test PR and implementation PR with gstack
+# Purpose: Verify exact human approval and prepare the test PR with gstack
 ##############################################################################
 
 set -e
@@ -11,7 +11,6 @@ set -e
 OWNER="${OWNER:-}"
 REPO="${REPO:-}"
 ISSUE_NUMBER="${ISSUE_NUMBER:-}"
-AUTO_MERGE_TESTS="${AUTO_MERGE_TESTS:-false}"
 DEPLOYMENT_CONFIG_PATH="${DEPLOYMENT_CONFIG_PATH:-config/deployment.yaml}"
 
 if [ -z "$OWNER" ] || [ -z "$REPO" ] || [ -z "$ISSUE_NUMBER" ]; then
@@ -25,17 +24,17 @@ echo "   Ticket: #$ISSUE_NUMBER"
 echo ""
 
 # Step 1: Verify "approved" comment exists
-echo "✅ Plan approved! Creating test and implementation PRs..."
+echo "Verifying exact approval before test PR creation..."
 echo ""
 
-# Step 2: Extract approved plan from comments
-APPROVED_COMMENT=$(gh issue view "$ISSUE_NUMBER" \
+# Step 2: Require a separate human comment with exactly "approved"
+APPROVAL_JSON=$(gh issue view "$ISSUE_NUMBER" \
     --repo "$OWNER/$REPO" \
     --json comments \
-    --jq '.comments[] | select(.body | contains("approved")) | .body' | head -1)
+    --jq '[.comments[] | select((.body | gsub("^\\s+|\\s+$"; "")) == "approved")] | first')
 
-if [ -z "$APPROVED_COMMENT" ]; then
-    echo "❌ Could not find approval comment"
+if [ -z "$APPROVAL_JSON" ] || [ "$APPROVAL_JSON" = "null" ]; then
+    echo "ERROR: No separate literal human approval comment found"
     exit 1
 fi
 
@@ -81,50 +80,6 @@ echo "     - tests/ticket-${ISSUE_NUMBER}.test.ts (or .js, .py)"
 echo "     - tests/ticket-${ISSUE_NUMBER}-e2e.test.ts (or .js, .py)"
 echo ""
 
-# Step 4: Create implementation PR with gstack
-IMPL_BRANCH="gstack/ticket-${ISSUE_NUMBER}-impl"
-echo "📝 Creating implementation PR on branch: $IMPL_BRANCH"
-
-IMPL_PR_BODY=$(cat <<EOF
-## Implementation PR for Ticket #${ISSUE_NUMBER}
-
-### Purpose
-Implementation of feature described in #${ISSUE_NUMBER}
-
-### Changes
-- [ ] Core feature implementation
-- [ ] Configuration updates
-- [ ] Deployment configuration updated
-- [ ] Documentation updated
-- [ ] Related tests passing
-
-### Related PRs
-- Depends on: #XXX (test PR number - will be populated)
-
-### Configuration Updates
-- Deployment config: \`${DEPLOYMENT_CONFIG_PATH}\`
-- Environment variables: (if needed)
-- Database migrations: (if needed)
-
-### Implementation Plan
-${PLAN_COMMENT}
-
-### Checklist
-- [ ] All CI checks passing
-- [ ] Test PR merged
-- [ ] Code review approved
-- [ ] Ready for deployment
-EOF
-)
-
-echo "📋 Implementation PR Structure:"
-echo "   Branch: $IMPL_BRANCH"
-echo "   Updates:"
-echo "     - Feature implementation in src/"
-echo "     - Config in $DEPLOYMENT_CONFIG_PATH"
-echo "     - Docs in docs/ or README.md"
-echo ""
-
 # Step 5: Update issue labels
 echo "🏷️  Updating issue labels..."
 gh issue edit "$ISSUE_NUMBER" \
@@ -138,14 +93,14 @@ ACTION_COMMENT=$(cat <<EOF
 
 **Stage 1 Complete:** Plan approved ✓
 
-**Stage 2 in Progress:**
-- Creating test PR: $TEST_BRANCH
-- Creating implementation PR: $IMPL_BRANCH
+**Test PR stage:**
+- Create test PR: $TEST_BRANCH
+- Implementation PR must wait until this test PR is merged
 
 **Next Steps:**
 1. Test PR will run all test suites
 2. Once tests pass, test PR can be merged
-3. Implementation PR will be created after test PR merge
+3. Implementation PR will be created only after test PR merge
 4. Code review and merge process begins
 EOF
 )
@@ -156,8 +111,7 @@ gh issue comment "$ISSUE_NUMBER" \
 
 echo ""
 echo "✅ Stage 2 Complete!"
-echo "   - Test PR created: $TEST_BRANCH"
-echo "   - Implementation PR created: $IMPL_BRANCH"
-echo "   - Issue updated with status"
+echo "   - Test PR branch prepared/documented: $TEST_BRANCH"
+echo "   - Implementation PR creation remains blocked until test PR merge"
 echo ""
 echo "⏭️  Next: Merge test PR → Implementation PR → Final Merge & Deploy"

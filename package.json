@@ -8,7 +8,8 @@
     "test": "bash scripts/test-automation.sh",
     "stage1": "bash scripts/stage1-daily-planning.sh",
     "stage2": "bash scripts/stage2-pr-creation.sh",
-    "stage3": "bash scripts/stage3-deploy.sh"
+    "stage3": "bash scripts/stage3-deploy.sh",
+    "package:claude-skill": "bash scripts/package-claude-skill.sh"
   },
   "keywords": [
     "github",

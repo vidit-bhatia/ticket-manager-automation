@@ -2,7 +2,7 @@
   "name": "ticket-manager-skill",
   "version": "1.0.0",
   "displayName": "Ticket Manager Automation",
-  "description": "Automates GitHub ticket management through 3 stages: planning, PR creation, and deployment with E2E testing",
+  "description": "GitHub Copilot automation manifest for ticket management; not a Claude Desktop or Claude Code skill package",
   "author": "Copilot Junior Engineer",
   "license": "MIT",
   
