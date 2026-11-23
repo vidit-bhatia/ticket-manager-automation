@@ -12,6 +12,31 @@ This repository supports three distinct integrations:
 
 The Claude packages are not GitHub Copilot extensions. `.github/extensions/.mjs` is a GitHub Copilot extension and is not an Agent Skill.
 
+## GitHub Copilot daily agent setup
+
+To run this as a daily Copilot automation in GitHub:
+
+1. Open your target repository in GitHub.
+2. Go to **Settings → Automations**.
+3. Create a new automation with a **daily** schedule (recommended: 09:00 UTC).
+4. Use a prompt that runs only Stage 1 each day (pick one ticket + post plan), for example:
+
+   ```text
+   Run Stage 1 ticket planning for owner/repo.
+   Pick exactly one issue matching is:open label:ready-to-plan.
+   Post one implementation plan comment and stop.
+   Do not create PRs. Wait for a separate human comment with exact text approved.
+   ```
+
+5. Set repository configuration in the automation or environment:
+   - `TICKET_MANAGER_REPO=owner/repo`
+   - `TICKET_MANAGER_QUERY=is:open label:ready-to-plan`
+   - `TICKET_MANAGER_E2E_CMD=npm run test:e2e`
+   - `TICKET_MANAGER_E2E_ENV=dev`
+   - `DEPLOYMENT_CONFIG_PATH=config/deployment.yaml`
+
+For full end-to-end flow, keep PR creation and deployment as separate automations triggered by explicit approval/merge states; do not combine all stages into one blind daily run.
+
 ## Safety and approval workflow
 
 The workflow never auto-approves or creates PRs from a plan alone:
